@@ -8,11 +8,12 @@ defmodule Swagger.Schema.Parameter do
   alias Swagger.Schema.Utils
   alias __MODULE__
 
-  @type t :: BodyParam.t
-    | HeaderParam.t
-    | PathParam.t
-    | QueryParam.t
-    | FormDataParam.t
+  @type t ::
+          BodyParam.t()
+          | HeaderParam.t()
+          | PathParam.t()
+          | QueryParam.t()
+          | FormDataParam.t()
 
   def from_schema(schema) when is_map(schema) do
     case do_from_schema(schema) do
@@ -24,62 +25,67 @@ defmodule Swagger.Schema.Parameter do
   defp do_from_schema(%{"name" => name, "in" => "body"} = schema) do
     Parameter.BodyParam.from_schema(name, schema)
   end
+
   defp do_from_schema(%{"name" => name, "in" => "header"} = schema) do
     Parameter.HeaderParam.from_schema(name, schema)
   end
+
   defp do_from_schema(%{"name" => name, "in" => "path"} = schema) do
     Parameter.PathParam.from_schema(name, schema)
   end
+
   defp do_from_schema(%{"name" => name, "in" => "query"} = schema) do
     Parameter.QueryParam.from_schema(name, schema)
   end
+
   defp do_from_schema(%{"name" => name, "in" => "formdata"} = schema) do
     Parameter.FormDataParam.from_schema(name, schema)
   end
+
   defp do_from_schema(%{"name" => name, "in" => in_type}) do
     {:error, {:invalid_parameter_in_type, in_type, name}}
   end
 
   defmodule Primitive do
     defstruct type: nil,
-      format: nil,
-      items: [],
-      collection_format: :csv,
-      default: nil,
-      maximum: nil,
-      minimum: nil,
-      exclusive_maximum?: false,
-      exclusive_minimum?: false,
-      max_length: nil,
-      min_length: nil,
-      pattern: nil,
-      max_items: nil,
-      min_items: nil,
-      unique_items?: false,
-      enum: nil,
-      multiple_of: nil
+              format: nil,
+              items: [],
+              collection_format: :csv,
+              default: nil,
+              maximum: nil,
+              minimum: nil,
+              exclusive_maximum?: false,
+              exclusive_minimum?: false,
+              max_length: nil,
+              min_length: nil,
+              pattern: nil,
+              max_items: nil,
+              min_items: nil,
+              unique_items?: false,
+              enum: nil,
+              multiple_of: nil
 
     @type primitive_type :: :string | :number | :integer | :boolean | :array
     @type collection_format :: :csv | :ssv | :tsv | :pipes
     @type t :: %__MODULE__{
-      type: primitive_type,
-      format: String.t,
-      items: [__MODULE__.t],
-      collection_format: collection_format,
-      default: term,
-      maximum: number,
-      minimum: number,
-      exclusive_maximum?: boolean,
-      exclusive_minimum?: boolean,
-      max_length: pos_integer,
-      min_length: non_neg_integer,
-      pattern: String.t,
-      max_items: pos_integer,
-      min_items: non_neg_integer,
-      unique_items?: boolean,
-      enum: [primitive_type],
-      multiple_of: pos_integer
-    }
+            type: primitive_type,
+            format: String.t(),
+            items: [__MODULE__.t()],
+            collection_format: collection_format,
+            default: term,
+            maximum: number,
+            minimum: number,
+            exclusive_maximum?: boolean,
+            exclusive_minimum?: boolean,
+            max_length: pos_integer,
+            min_length: non_neg_integer,
+            pattern: String.t(),
+            max_items: pos_integer,
+            min_items: non_neg_integer,
+            unique_items?: boolean,
+            enum: [primitive_type],
+            multiple_of: pos_integer
+          }
 
     use Swagger.Access
 
@@ -93,6 +99,7 @@ defmodule Swagger.Schema.Parameter do
       |> Map.put(:exclusive_minimum, schema["exclusiveMinimum"])
       |> Map.put(:multiple_of, schema["multiple_of"])
     end
+
     def from_schema(%{"type" => "string"} = schema) do
       %__MODULE__{type: :string}
       |> Map.put(:default, schema["default"])
@@ -101,10 +108,12 @@ defmodule Swagger.Schema.Parameter do
       |> Map.put(:pattern, schema["pattern"])
       |> Map.put(:enum, schema["enum"])
     end
+
     def from_schema(%{"type" => "boolean"} = schema) do
       %__MODULE__{type: :boolean}
       |> Map.put(:default, schema["default"])
     end
+
     def from_schema(%{"type" => "array"} = schema) do
       %__MODULE__{type: :array}
       |> Map.put(:items, Enum.map(schema["items"] || [], &from_schema/1))
@@ -116,6 +125,7 @@ defmodule Swagger.Schema.Parameter do
       |> Map.put(:min_items, schema["minItems"])
       |> Map.put(:unique_items?, schema["uniqueItems"])
     end
+
     def from_schema(%{"type" => type}) do
       {:error, {:invalid_primitive_type, type}}
     end
@@ -123,12 +133,18 @@ defmodule Swagger.Schema.Parameter do
 
   defmodule BodyParam do
     defstruct name: nil,
-      description: nil,
-      required?: false,
-      schema: nil,
-      properties: %{}
+              description: nil,
+              required?: false,
+              schema: nil,
+              properties: %{}
 
-    @type t :: %__MODULE__{name: String.t, description: String.t, required?: boolean, schema: Map.t, properties: Map.t}
+    @type t :: %__MODULE__{
+            name: String.t(),
+            description: String.t(),
+            required?: boolean,
+            schema: Map.t(),
+            properties: Map.t()
+          }
 
     use Swagger.Access
 
@@ -143,12 +159,18 @@ defmodule Swagger.Schema.Parameter do
 
   defmodule HeaderParam do
     defstruct name: nil,
-      description: nil,
-      required?: false,
-      spec: nil,
-      properties: %{}
+              description: nil,
+              required?: false,
+              spec: nil,
+              properties: %{}
 
-    @type t :: %__MODULE__{name: String.t, description: String.t, required?: boolean, spec: Primitive.t, properties: Map.t}
+    @type t :: %__MODULE__{
+            name: String.t(),
+            description: String.t(),
+            required?: boolean,
+            spec: Primitive.t(),
+            properties: Map.t()
+          }
 
     use Swagger.Access
 
@@ -163,14 +185,20 @@ defmodule Swagger.Schema.Parameter do
 
   defmodule QueryParam do
     defstruct name: nil,
-      description: nil,
-      required?: false,
-      allow_empty?: false,
-      spec: nil,
-      properties: %{}
+              description: nil,
+              required?: false,
+              allow_empty?: false,
+              spec: nil,
+              properties: %{}
 
-    @type t :: %__MODULE__{name: String.t, description: String.t, required?: boolean, allow_empty?: boolean,
-                           spec: Primitive.t, properties: Map.t}
+    @type t :: %__MODULE__{
+            name: String.t(),
+            description: String.t(),
+            required?: boolean,
+            allow_empty?: boolean,
+            spec: Primitive.t(),
+            properties: Map.t()
+          }
 
     use Swagger.Access
 
@@ -186,14 +214,20 @@ defmodule Swagger.Schema.Parameter do
 
   defmodule FormDataParam do
     defstruct name: nil,
-      description: nil,
-      required?: false,
-      allow_empty?: false,
-      spec: nil,
-      properties: %{}
+              description: nil,
+              required?: false,
+              allow_empty?: false,
+              spec: nil,
+              properties: %{}
 
-    @type t :: %__MODULE__{name: String.t, description: String.t, required?: boolean, allow_empty?: boolean,
-                           spec: Primitive.t, properties: Map.t}
+    @type t :: %__MODULE__{
+            name: String.t(),
+            description: String.t(),
+            required?: boolean,
+            allow_empty?: boolean,
+            spec: Primitive.t(),
+            properties: Map.t()
+          }
 
     use Swagger.Access
 
@@ -209,12 +243,18 @@ defmodule Swagger.Schema.Parameter do
 
   defmodule PathParam do
     defstruct name: nil,
-      description: nil,
-      required?: false,
-      spec: nil,
-      properties: %{}
+              description: nil,
+              required?: false,
+              spec: nil,
+              properties: %{}
 
-    @type t :: %__MODULE__{name: String.t, description: String.t, required?: boolean, spec: Primitive.t, properties: Map.t}
+    @type t :: %__MODULE__{
+            name: String.t(),
+            description: String.t(),
+            required?: boolean,
+            spec: Primitive.t(),
+            properties: Map.t()
+          }
 
     use Swagger.Access
 
@@ -232,8 +272,9 @@ defmodule Swagger.Schema.Parameter do
     case Primitive.from_schema(schema) do
       {:error, _} = err ->
         err
-      p -> Map.put(param, :spec, p)
+
+      p ->
+        Map.put(param, :spec, p)
     end
   end
-
 end

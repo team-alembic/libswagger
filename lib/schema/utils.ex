@@ -8,6 +8,7 @@ defmodule Swagger.Schema.Utils do
     Enum.reduce(schema, %{}, fn
       {"x-" <> k, v}, acc ->
         Map.put(acc, "x-#{k}", v)
+
       {_k, _v}, acc ->
         acc
     end)
@@ -22,5 +23,4 @@ defmodule Swagger.Schema.Utils do
       _ -> []
     end
   end
-
 end
