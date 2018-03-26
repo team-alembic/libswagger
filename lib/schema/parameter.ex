@@ -96,7 +96,7 @@ defmodule Swagger.Schema.Parameter do
       |> Map.put(:maximum, schema["maximum"])
       |> Map.put(:minimum, schema["minimum"])
       |> Map.put(:exclusive_maximum?, schema["exclusiveMaximum"])
-      |> Map.put(:exclusive_minimum, schema["exclusiveMinimum"])
+      |> Map.put(:exclusive_minimum?, schema["exclusiveMinimum"])
       |> Map.put(:multiple_of, schema["multiple_of"])
     end
 
