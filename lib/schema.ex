@@ -140,7 +140,6 @@ defmodule Swagger.Schema do
   defp apply_security_requirements(security_definitions, obj, reqs) do
     security =
       reqs
-      |> Enum.flat_map(fn r -> r end)
       |> Enum.reduce([], fn
         _, {:error, _} = err ->
           err
@@ -156,18 +155,26 @@ defmodule Swagger.Schema do
             nil ->
               {:error, {:invalid_security, req_name, :definition_not_found}}
 
-            %{scopes: scopes} ->
-              cond do
-                Enum.all?(desired_scopes, fn s -> s in scopes end) ->
-                  [{req_name, desired_scopes} | acc]
+            %{scopes: scopes} when is_map(scopes) ->
+              validate_scopes(req_name, desired_scopes, Map.keys(scopes), acc)
 
-                :else ->
-                  invalid = Enum.reject(desired_scopes, fn s -> s in scopes end)
-                  {:error, {:invalid_security, req_name, {:invalid_scopes, invalid}}}
-              end
+            # Check: Not sure if a list is valid here
+            %{scopes: scopes} ->
+              validate_scopes(req_name, desired_scopes, scopes, acc)
           end
       end)
 
     %{obj | :security => security}
+  end
+
+  defp validate_scopes(req_name, desired_scopes, scopes, acc) do
+    cond do
+      Enum.all?(desired_scopes, fn s -> s in scopes end) ->
+        [{req_name, desired_scopes} | acc]
+
+      :else ->
+        invalid = Enum.reject(desired_scopes, fn s -> s in scopes end)
+        {:error, {:invalid_security, req_name, {:invalid_scopes, invalid}}}
+    end
   end
 end
