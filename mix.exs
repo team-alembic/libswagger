@@ -25,7 +25,7 @@ defmodule Swagger.Mixfile do
       {:hackney, "~> 1.11", optional: true},
       {:yamerl, "~> 0.7"},
       {:yaml_elixir, "~> 1.3"},
-      {:ex_json_schema, "~> 0.5"}
+      {:ex_json_schema, github: "team-alembic/ex_json_schema"}
     ]
   end
 end
