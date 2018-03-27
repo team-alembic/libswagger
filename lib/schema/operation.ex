@@ -69,6 +69,11 @@ defmodule Swagger.Schema.Operation do
     end
   end
 
+  # Handle missing operationId gracefully
+  def from_schema(name, op) do
+    from_schema(name, Map.merge(op, %{"operationId" => "noOperationId"}))
+  end
+
   defp extract_security(%{"security" => security_requirements})
        when is_list(security_requirements) do
     security_requirements
