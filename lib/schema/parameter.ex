@@ -129,6 +129,11 @@ defmodule Swagger.Schema.Parameter do
     def from_schema(%{"type" => type}) do
       {:error, {:invalid_primitive_type, type}}
     end
+
+    @doc "Handle tuples from array item processing"
+    def from_schema({key, type}) do
+      from_schema(%{key => type})
+    end
   end
 
   defmodule BodyParam do
