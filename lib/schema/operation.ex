@@ -109,6 +109,19 @@ defmodule Swagger.Schema.Operation do
       {http_status, %{"schema" => schema}}, acc ->
         Map.put(acc, String.to_integer(http_status), schema)
 
+      # Handle the following scenario:
+      #
+      # "/health":
+      #   get:
+      #     description: ''
+      #     operationId: health
+      #     summary: Health check endpoint
+      #     responses:
+      #       default:
+      #         description: successful operation
+      {"default", _}, acc ->
+        Map.put(acc, "default", nil)
+
       {http_status, _}, acc ->
         Map.put(acc, String.to_integer(http_status), nil)
     end)
