@@ -1,6 +1,8 @@
 defmodule Swagger.BulkParserTest do
   use ExUnit.Case, async: true
 
+  @moduletag :integration
+
   test "can parse all the sample swagger files" do
     Path.wildcard("test/schemas/*.swagger")
     |> Enum.each(fn filename ->
