@@ -42,6 +42,10 @@ defmodule Swagger.Schema.Parameter do
     Parameter.FormDataParam.from_schema(name, schema)
   end
 
+  defp do_from_schema(%{"name" => name, "in" => "formData"} = schema) do
+    Parameter.FormDataParam.from_schema(name, schema)
+  end
+
   defp do_from_schema(%{"name" => name, "in" => in_type}) do
     {:error, {:invalid_parameter_in_type, in_type, name}}
   end
@@ -65,7 +69,7 @@ defmodule Swagger.Schema.Parameter do
               enum: nil,
               multiple_of: nil
 
-    @type primitive_type :: :string | :number | :integer | :boolean | :array
+    @type primitive_type :: :string | :number | :integer | :boolean | :array | :file
     @type collection_format :: :csv | :ssv | :tsv | :pipes
     @type t :: %__MODULE__{
             type: primitive_type,
@@ -116,7 +120,7 @@ defmodule Swagger.Schema.Parameter do
 
     def from_schema(%{"type" => "array"} = schema) do
       %__MODULE__{type: :array}
-      |> Map.put(:items, Enum.map(schema["items"] || [], &from_schema/1))
+      |> Map.put(:items, from_items(schema["items"]))
       |> Map.put(:collection_format, schema["collectionFormat"])
       |> Map.put(:default, schema["default"])
       |> Map.put(:max_length, schema["maxLength"])
@@ -126,13 +130,26 @@ defmodule Swagger.Schema.Parameter do
       |> Map.put(:unique_items?, schema["uniqueItems"])
     end
 
+    def from_schema(%{"type" => "file"}) do
+      %__MODULE__{type: :file}
+    end
+
     def from_schema(%{"type" => type}) do
       {:error, {:invalid_primitive_type, type}}
     end
 
-    @doc "Handle tuples from array item processing"
-    def from_schema({key, type}) do
-      from_schema(%{key => type})
+    defp from_items(%{"enum" => values, "type" => "string"}) do
+      %__MODULE__{type: :enum}
+      |> Map.put(:values, values)
+    end
+
+    defp from_items(%{"enum" => values, "type" => type}) do
+      # might need to handle this, but graphql enums are strings
+      {:error, {:invalid_enum_type, type, values}}
+    end
+
+    defp from_items(items) when is_map(items) do
+      {:error, {:invalid_items_type, items}}
     end
   end
 
