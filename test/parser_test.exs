@@ -1,4 +1,4 @@
-defmodule SwaggerParserTests do
+defmodule Swagger.ParserTest do
   use ExUnit.Case, async: true
 
   alias Swagger.Schema

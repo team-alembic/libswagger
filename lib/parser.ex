@@ -20,6 +20,9 @@ defmodule Swagger.Parser do
       ".yaml" ->
         with {:ok, yaml} <- File.read(path), do: parse_yaml(yaml)
 
+      ".swagger" ->
+        with {:ok, yaml} <- File.read(path), do: parse_yaml(yaml)
+
       ext ->
         raise "Unsupported file type: #{ext}"
     end
@@ -29,7 +32,9 @@ defmodule Swagger.Parser do
   Parses the given binary as JSON
   """
   def parse_json(json) do
-    with {:ok, parsed} <- Poison.decode(json), do: {:ok, parsed |> expand() |> to_struct()}
+    with {:ok, parsed} <- Poison.decode(json) do
+      {:ok, parsed |> expand() |> to_struct()}
+    end
   end
 
   @doc """
