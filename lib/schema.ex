@@ -137,6 +137,17 @@ defmodule Swagger.Schema do
     end
   end
 
+  @doc """
+  Handle a list of non-oauth security definitions.
+
+      security:
+      - API Key: []
+
+  """
+  defp apply_security_requirements(security_definitions, obj, reqs) when is_list(reqs) do
+    %{obj | :security => reqs}
+  end
+
   defp apply_security_requirements(security_definitions, obj, reqs) do
     security =
       reqs
